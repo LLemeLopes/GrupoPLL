@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Servidor de banco de Dados'
+Parameters:
+  SubnetPrivate:
+    Type: String
+    Description: ID Subnet
+    Default : subnet-0d7c2caddaba9c06f
+  VPCID:
+    Type: String
+    Description: ID VPC
+    Default : vpc-0d39fdf3ab55dee88
+  AMIID:
+    Type: String
+    Description: ID da Imagem para criar o servidor 
+    Default: ami-0bcc094591f354be2   
+  KeyName:
+    Description: EC2 KeyPair
+    Type: String
+    Default: grupopll-key-v2
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t3.small
+    AllowedValues:
+    - t3.nano
+    - t3.micro
+    - t3.small
+    - t3.medium
+    - t3.large
+    ConstraintDescription: must be a valid EC2 instance type.
+  SSHLocation:
+    Description: O Range de IP que ira conectar no EC2
+    Type: String
+    MinLength: '9'
+    MaxLength: '18'
+    Default: 172.142.80.0/22
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+Resources:
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType:
+        Ref: InstanceType
+      SecurityGroupIds: 
+        - !GetAtt "InstanceSecurityGroup.GroupId"
+      SubnetId: 
+        Ref: SubnetPrivate
+      KeyName:
+        Ref: KeyName
+      BlockDeviceMappings: 
+      - DeviceName: "/dev/sdm"
+        Ebs: 
+          VolumeType: "gp2"
+          DeleteOnTermination: "false"
+          VolumeSize: "100"
+      - DeviceName: "/dev/sdk"
+        NoDevice: {}
+      ImageId:
+        Ref: AMIID
+      Tags:
+        -
+          Key: Name
+          Value: DWPLL
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: "ssh-group"
+      VpcId: !Ref VPCID
+      GroupDescription: Enable SSH access via port 22
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp:
+          Ref: SSHLocation
+Outputs:
+  InstanceId:
+    Description: InstanceId of the newly created EC2 instance
+    Value:
+      Ref: EC2Instance
+  AZ:
+    Description: Availability Zone of the newly created EC2 instance
+    Value:
+      Fn::GetAtt:
+      - EC2Instance
+      - AvailabilityZone
+  PrivateIP:
+    Description: Private IP address of the newly created EC2 instance
+    Value:
+      Fn::GetAtt:
+      - EC2Instance
+      - PrivateIp
