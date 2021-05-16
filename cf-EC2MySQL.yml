@@ -8,7 +8,7 @@ Parameters:
   VPCID:
     Type: String
     Description: ID VPC
-    Default : vpc-0d39fdf3ab55dee88
+    Default : vpc-0d39fdf3ab55dfe88
   AMIID:
     Type: String
     Description: ID da Imagem para criar o servidor 
