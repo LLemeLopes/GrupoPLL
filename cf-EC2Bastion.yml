@@ -16,7 +16,7 @@ Parameters:
   KeyName:
     Description: EC2 KeyPair
     Type: String
-    Default: grupopll-key-v2
+    Default: grupopll-key-v3
   InstanceType:
     Description: EC2 instance type
     Type: String
